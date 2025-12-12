@@ -1,201 +1,313 @@
-// =========================================
-// 1. SELECTORS
-// =========================================
-const todoInput = document.querySelector('#todo-input');
-const dateInput = document.querySelector('#date-input');
-const todoButton = document.querySelector('.add-btn');
-const todoList = document.querySelector('.todo-list');
-const filterOption = document.querySelector('.filter-todo');
-const deleteAllButton = document.querySelector('.delete-all-btn');
-const emptyMsg = document.querySelector('#empty-msg');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
 
-// Selectors untuk Dark/Light Mode
-const modeToggle = document.querySelector('#mode-toggle');
-const bodyTag = document.querySelector('#body-tag');
-
-// =========================================
-// 2. EVENT LISTENERS
-// =========================================
-document.addEventListener('DOMContentLoaded', initApp); // Jalan saat web dibuka
-todoButton.addEventListener('click', addTodo);
-todoList.addEventListener('click', deleteCheck);
-filterOption.addEventListener('change', filterTodo);
-deleteAllButton.addEventListener('click', deleteAll);
-modeToggle.addEventListener('click', toggleMode);
-
-// =========================================
-// 3. FUNCTIONS UTAMA
-// =========================================
-
-// Fungsi inisialisasi awal (Cek Mode & Cek List Kosong)
-function initApp() {
-    // A. Cek Preferensi Mode di Local Storage
-    const savedMode = localStorage.getItem('mode');
-    if (savedMode === 'light') {
-        bodyTag.classList.add('light-mode');
-        modeToggle.innerHTML = '<i class="fas fa-moon"></i>'; // Icon Bulan
-    } else {
-        modeToggle.innerHTML = '<i class="fas fa-sun"></i>';  // Icon Matahari
-    }
-
-    // B. Cek apakah list kosong
-    checkEmpty();
-}
-
-// Fungsi Ganti Mode (Dark/Light)
-function toggleMode() {
-    bodyTag.classList.toggle('light-mode');
-
-    // Cek apakah sekarang jadi Light Mode?
-    if (bodyTag.classList.contains('light-mode')) {
-        localStorage.setItem('mode', 'light'); // Simpan ke memori browser
-        modeToggle.innerHTML = '<i class="fas fa-moon"></i>';
-    } else {
-        localStorage.setItem('mode', 'dark'); // Simpan ke memori browser
-        modeToggle.innerHTML = '<i class="fas fa-sun"></i>';
-    }
-}
-
-// Fungsi Cek List Kosong (Show/Hide "No task found")
-function checkEmpty() {
-    const todos = todoList.children;
-    if (todos.length === 0) {
-        emptyMsg.style.display = 'block';
-    } else {
-        emptyMsg.style.display = 'none';
-    }
-}
-
-// Fungsi Tambah Task
-function addTodo(event) {
-    event.preventDefault();
-
-    // Validasi Input
-    if (todoInput.value === "" || dateInput.value === "") {
-        alert("Please fill in both Task and Date fields.");
-        return;
-    }
-
-    // Buat Container Item (li)
-    const todoDiv = document.createElement("li");
-    todoDiv.classList.add("todo-item");
-
-    // 1. Kolom TASK
-    const taskTitle = document.createElement('span');
-    taskTitle.innerText = todoInput.value;
-    taskTitle.classList.add('task-text');
-    todoDiv.appendChild(taskTitle);
-
-    // 2. Kolom DUE DATE
-    const taskDate = document.createElement('span');
-    taskDate.innerText = dateInput.value;
-    todoDiv.appendChild(taskDate);
-
-    // 3. Kolom STATUS (Default: Pending)
-    const taskStatus = document.createElement('span');
-    taskStatus.innerText = "Pending";
-    taskStatus.classList.add('status-badge', 'status-pending');
-    todoDiv.appendChild(taskStatus);
-
-    // 4. Kolom ACTIONS (Check & Delete buttons)
-    const actionDiv = document.createElement('div');
+/* =========================================
+   1. DEFINISI WARNA (VARIABLES)
+   ========================================= */
+:root {
+    /* --- DARK MODE (DEFAULT) --- */
+    --bg-primary: #12121f;       /* Background Halaman */
+    --bg-secondary: #1e1e2e;     /* Background Kartu Utama */
+    --bg-input: #2d2d44;         /* Background Input & Filter */
+    --input-border: #3f3f5f;     /* Border Input */
+    --text-main: #ffffff;        /* Warna Teks Utama */
+    --text-secondary: #a0a0b0;   /* Warna Teks Header Tabel/Placeholder */
+    --item-bg: #26263b;          /* Background List Item */
     
-    // Check Button
-    const completedButton = document.createElement('button');
-    completedButton.innerHTML = '<i class="fas fa-check"></i>';
-    completedButton.classList.add("action-btn", "check-btn");
-    actionDiv.appendChild(completedButton);
-
-    // Trash Button
-    const trashButton = document.createElement('button');
-    trashButton.innerHTML = '<i class="fas fa-trash"></i>';
-    trashButton.classList.add("action-btn", "trash-btn");
-    actionDiv.appendChild(trashButton);
-
-    todoDiv.appendChild(actionDiv);
-
-    // Append ke List Utama
-    todoList.appendChild(todoDiv);
-
-    // Reset Input
-    todoInput.value = "";
-    dateInput.value = "";
-
-    // Cek ulang untuk hilangkan pesan kosong
-    checkEmpty();
+    --primary-color: #7b68ee;    /* Ungu Utama */
+    --primary-hover: #5f4dd0;    /* Ungu Gelap (Hover) */
+    --danger-color: #ff4757;     /* Merah (Delete) */
+    --success-color: #2ed573;    /* Hijau (Completed) */
+    --pending-color: #ff9f43;    /* Kuning (Pending) */
+    
+    --calendar-scheme: dark;     /* Warna ikon kalender */
+    --shadow-color: rgba(0, 0, 0, 0.5);
 }
 
-// Fungsi Delete & Check
-function deleteCheck(e) {
-    const item = e.target;
-    // Handle klik pada ikon di dalam tombol (biar tombol tetap jalan meski kena ikonnya)
-    const itemParent = item.closest('button'); 
+/* --- LIGHT MODE (DI-TRIGGER OLEH JS) --- */
+.light-mode {
+    --bg-primary: #f0f2f5;       /* Abu-abu terang */
+    --bg-secondary: #ffffff;     /* Putih bersih */
+    --bg-input: #f1f3f4;         /* Abu-abu sangat muda */
+    --input-border: #d1d5db;     /* Border abu-abu */
+    --text-main: #333333;        /* Hitam/Abu gelap */
+    --text-secondary: #666666;   /* Abu-abu medium */
+    --item-bg: #f8f9fa;          /* Putih keabuan */
 
-    if (!itemParent) return;
-
-    // DELETE ITEM
-    if (itemParent.classList.contains("trash-btn")) {
-        const todo = itemParent.closest('.todo-item');
-        
-        // Animasi (opsional) atau langsung hapus
-        todo.remove();
-        checkEmpty(); // Cek jika list jadi kosong
-    }
-
-    // CHECK MARK (COMPLETE)
-    if (itemParent.classList.contains("check-btn")) {
-        const todo = itemParent.closest('.todo-item');
-        todo.classList.toggle("completed");
-        
-        // Update teks status dan warna badge
-        const statusBadge = todo.querySelector('.status-badge');
-        if (todo.classList.contains("completed")) {
-            statusBadge.innerText = "Completed";
-            statusBadge.classList.remove('status-pending');
-            statusBadge.classList.add('status-completed');
-        } else {
-            statusBadge.innerText = "Pending";
-            statusBadge.classList.remove('status-completed');
-            statusBadge.classList.add('status-pending');
-        }
-    }
+    --primary-color: #7b68ee;    /* Tetap Ungu */
+    --primary-hover: #5f4dd0;
+    
+    --calendar-scheme: light;    /* Kalender jadi terang */
+    --shadow-color: rgba(0, 0, 0, 0.1); /* Bayangan lebih halus */
 }
 
-// Fungsi Filter (All / Completed / Pending)
-function filterTodo(e) {
-    const todos = todoList.childNodes;
-    todos.forEach(function(todo) {
-        if (todo.nodeType === 1) { // Pastikan element node
-            switch (e.target.value) {
-                case "all":
-                    todo.style.display = "grid"; // Pakai grid agar layout tidak rusak
-                    break;
-                case "completed":
-                    if (todo.classList.contains("completed")) {
-                        todo.style.display = "grid";
-                    } else {
-                        todo.style.display = "none";
-                    }
-                    break;
-                case "uncompleted": // Pending
-                    if (!todo.classList.contains("completed")) {
-                        todo.style.display = "grid";
-                    } else {
-                        todo.style.display = "none";
-                    }
-                    break;
-            }
-        }
-    });
+/* =========================================
+   2. RESET & GLOBAL STYLES
+   ========================================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; /* Animasi transisi halus saat ganti mode */
 }
 
-// Fungsi Delete All
-function deleteAll(e) {
-    e.preventDefault();
-    // Konfirmasi dulu agar tidak terhapus tidak sengaja
-    const confirmDelete = confirm("Are you sure you want to delete ALL tasks?");
-    if (confirmDelete) {
-        todoList.innerHTML = ""; // Hapus semua isi list
-        checkEmpty(); // Munculkan pesan 'No task found'
-    }
+body {
+    background-color: var(--bg-primary);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    color: var(--text-main);
+}
+
+/* =========================================
+   3. CONTAINER UTAMA
+   ========================================= */
+.container {
+    background-color: var(--bg-secondary);
+    width: 90%;
+    max-width: 800px;
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px var(--shadow-color);
+    position: relative; /* Agar tombol toggle bisa diposisikan absolute relatif ke container */
+}
+
+header h2 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: var(--text-main);
+}
+
+/* =========================================
+   4. TOMBOL TOGGLE MODE (BARU)
+   ========================================= */
+.mode-toggle {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: var(--bg-input);
+    color: var(--primary-color); /* Warna ikon */
+    border: 1px solid var(--input-border);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+}
+
+.mode-toggle:hover {
+    background-color: var(--primary-color);
+    color: white;
+    transform: rotate(15deg);
+}
+
+/* =========================================
+   5. INPUT SECTION
+   ========================================= */
+.input-section {
+    margin-bottom: 1.5rem;
+}
+
+.input-group {
+    display: flex;
+    gap: 10px;
+}
+
+.custom-input {
+    background-color: var(--bg-input);
+    border: 1px solid var(--input-border);
+    padding: 12px;
+    border-radius: 8px;
+    color: var(--text-main);
+    outline: none;
+    font-size: 0.9rem;
+}
+
+#todo-input {
+    flex: 2; 
+}
+
+.date-input {
+    flex: 1;
+    color-scheme: var(--calendar-scheme); /* Otomatis berubah dark/light */
+}
+
+.add-btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: 0.3s;
+}
+
+.add-btn:hover {
+    background-color: var(--primary-hover);
+}
+
+/* =========================================
+   6. ACTIONS ROW (FILTER & DELETE ALL)
+   ========================================= */
+.actions-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+}
+
+.filter-todo {
+    background-color: var(--bg-input);
+    color: var(--text-main);
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: 1px solid var(--input-border);
+    cursor: pointer;
+    outline: none;
+}
+
+.delete-all-btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.delete-all-btn:hover {
+    background-color: var(--danger-color); 
+}
+
+/* =========================================
+   7. TABLE HEADER & LIST
+   ========================================= */
+.table-header {
+    display: grid;
+    /* Grid: Task | Date | Status | Actions */
+    grid-template-columns: 2fr 1fr 1fr 1fr; 
+    padding: 10px 15px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--input-border);
+    margin-bottom: 10px;
+}
+
+.todo-list {
+    list-style: none;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+/* Scrollbar Styling (Opsional, agar cantik) */
+.todo-list::-webkit-scrollbar {
+    width: 5px;
+}
+.todo-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+.todo-list::-webkit-scrollbar-thumb {
+    background: var(--input-border);
+    border-radius: 10px;
+}
+
+.todo-item {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    align-items: center;
+    background-color: var(--item-bg);
+    color: var(--text-main);
+    margin-bottom: 8px;
+    padding: 12px 15px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    border: 1px solid transparent; /* Persiapan untuk light mode agar lebih tegas */
+}
+
+/* Di light mode, item diberi border tipis agar terlihat jelas */
+.light-mode .todo-item {
+    border: 1px solid #e0e0e0;
+}
+
+/* =========================================
+   8. STATUS BADGES & BUTTONS
+   ========================================= */
+.status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    text-align: center;
+    width: fit-content;
+}
+
+.status-pending {
+    background-color: var(--pending-color);
+    color: #1e1e2e; /* Teks tetap gelap agar kontras */
+}
+
+.status-completed {
+    background-color: var(--success-color);
+    color: #1e1e2e; /* Teks tetap gelap agar kontras */
+}
+
+.action-btn {
+    border: none;
+    padding: 6px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 5px;
+    font-size: 0.9rem;
+    transition: 0.3s;
+}
+
+.check-btn {
+    background-color: var(--success-color);
+    color: white;
+}
+.check-btn:hover {
+    filter: brightness(0.9);
+}
+
+.trash-btn {
+    background-color: var(--danger-color);
+    color: white;
+}
+.trash-btn:hover {
+    filter: brightness(0.9);
+}
+
+/* =========================================
+   9. COMPLETED & EMPTY STATES
+   ========================================= */
+.todo-item.completed {
+    opacity: 0.6;
+}
+
+.todo-item.completed .task-text {
+    text-decoration: line-through;
+    color: var(--text-secondary);
+}
+
+.empty-message {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-secondary);
+    font-style: italic;
+    display: block; 
+}
+
+.hide {
+    display: none;
 }
