@@ -1,0 +1,203 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background-color: #12121f; /* Background halaman gelap */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    color: white;
+}
+
+.container {
+    background-color: #1e1e2e; /* Warna kartu lebih terang dikit */
+    width: 90%;
+    max-width: 800px;
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+header h2 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: #e0e0e0;
+}
+
+/* --- Input Section --- */
+.input-section {
+    margin-bottom: 1.5rem;
+}
+
+.input-group {
+    display: flex;
+    gap: 10px;
+}
+
+.custom-input {
+    background-color: #2d2d44;
+    border: 1px solid #3f3f5f;
+    padding: 12px;
+    border-radius: 8px;
+    color: white;
+    outline: none;
+    font-size: 0.9rem;
+}
+
+#todo-input {
+    flex: 2; /* Mengambil porsi lebih lebar */
+}
+
+.date-input {
+    flex: 1;
+    color-scheme: dark;
+}
+
+.add-btn {
+    background-color: #7b68ee; /* Warna ungu seperti referensi */
+    color: white;
+    border: none;
+    padding: 0 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: 0.3s;
+}
+
+.add-btn:hover {
+    background-color: #5f4dd0;
+}
+
+/* --- Actions Row (Filter & Delete All) --- */
+.actions-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+}
+
+.filter-todo {
+    background-color: #2d2d44;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: 1px solid #3f3f5f;
+    cursor: pointer;
+}
+
+.delete-all-btn {
+    background-color: #7b68ee;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.delete-all-btn:hover {
+    background-color: #ff4757; /* Merah saat hover warning */
+}
+
+/* --- Table Header Grid --- */
+.table-header {
+    display: grid;
+    /* Grid: Task(luas) | Date | Status | Actions */
+    grid-template-columns: 2fr 1fr 1fr 1fr; 
+    padding: 10px 15px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    color: #a0a0b0;
+    text-transform: uppercase;
+    border-bottom: 1px solid #3f3f5f;
+    margin-bottom: 10px;
+}
+
+/* --- Todo List Items --- */
+.todo-list {
+    list-style: none;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.todo-item {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    align-items: center;
+    background-color: #26263b;
+    margin-bottom: 8px;
+    padding: 12px 15px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    text-align: center;
+    width: fit-content;
+}
+
+.status-pending {
+    background-color: #ff9f43;
+    color: #1e1e2e;
+}
+
+.status-completed {
+    background-color: #2ed573;
+    color: #1e1e2e;
+}
+
+/* Actions Buttons in List */
+.action-btn {
+    border: none;
+    padding: 6px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 5px;
+    font-size: 0.9rem;
+}
+
+.check-btn {
+    background-color: #2ed573;
+    color: white;
+}
+
+.trash-btn {
+    background-color: #ff4757;
+    color: white;
+}
+
+/* --- Completed State Styling --- */
+.todo-item.completed {
+    opacity: 0.6;
+}
+
+.todo-item.completed .task-text {
+    text-decoration: line-through;
+    color: #a0a0b0;
+}
+
+/* --- Empty State --- */
+.empty-message {
+    text-align: center;
+    padding: 2rem;
+    color: #a0a0b0;
+    font-style: italic;
+    display: block; /* Default muncul */
+}
+
+.hide {
+    display: none;
+}
